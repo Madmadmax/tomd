@@ -81,7 +81,53 @@ INLINE_ELEMENTS = {
     'tbody': '<tbody.*?>((.|\n)*)</tbody>',
 }
 
-DELETE_ELEMENTS = ['<span.*?>', '</span>', '<div.*?>', '</div>', '<br clear="none"/>', '<center.*?>', '</center>']
+DELETE_ELEMENTS = [
+    '<span.*?>',
+    '</span>',
+    '<div.*?>',
+    '</div>',
+    '<br clear="none"/>',
+    '<center.*?>',
+    '</center>',
+    '<small>',
+    '</small>'
+]
+
+HTML_ENTITIES = {
+    "&amp;":    "&",
+    "&lt;":     "<",
+    "&gt;":     ">",
+    "&nbsp;":   " ",
+    "&iexcl;":  "¡",
+    "&cent;":   "¢",
+    "&pound;":  "£",
+    "&curren;": "¤",
+    "&yen;":    "¥",
+    "&brvbar;": "¦",
+    "&sect;":   "§",
+    "&uml;":    "¨",
+    "&copy;":   "©",
+    "&laquo;":  "«",
+    "&not;":    "¬",
+    "&shy;":    "",
+    "&reg;":    "®",
+    "&macr;":   "¯",
+    "&deg;":    "°",
+    "&plusmn;": "±",
+    "&sup2;":   "²",
+    "&sup3;":   "³",
+    "&acute;":  "´",
+    "&para;":   "¶",
+    "&cedil;":  "¸",
+    "&sup1;":   "¹",
+    "&raquo;":  "»",
+    "&frac14;": "¼",
+    "&frac12;": "½",
+    "&frac34;": "¾",
+    "&iquest;": "¿",
+    "&times;":  "×",
+    "&divide;": "÷",
+}
 
 
 class Element:
@@ -107,6 +153,9 @@ class Element:
         self.content = self.content.replace('\r', '')  # windows \r character
         self.content = self.content.replace('\xc2\xa0', ' ')  # no break space
         self.content = self.content.replace('&quot;', '\"')  # html quote mark
+        # replace html entities
+        for symbol in HTML_ENTITIES.keys():
+            self.content = self.content.replace(symbol, HTML_ENTITIES[symbol])
 
         for m in re.finditer("<img(.*?)en_todo.*?>", self.content):
             # remove img and change to [ ] and [x]
@@ -230,6 +279,11 @@ class Tomd:
 
         for index, element in enumerate(DELETE_ELEMENTS):
             self._markdown = re.sub(element, '', self._markdown)
+
+        # Delete excess line breaks
+        while self._markdown.startswith('\n'):
+            self._markdown = self._markdown[1:]
+
         return self._markdown
 
     @property
